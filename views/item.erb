@@ -1,0 +1,382 @@
+<link rel="stylesheet" type="text/css" href="bolw.css" media="all">
+<head>
+<title><%= settings.boletin %></title>
+<script>
+function addtag(val)
+{
+	a=document.getElementById("tagsid").value;
+	if (a.length>0){
+		a=a+","+val;
+	} else {
+		a=val;
+	}
+	document.getElementById("tagsid").value=a
+}
+</script>
+</head>
+<body>
+
+<%=
+	if !settings.erro.empty?
+		proverr=settings.erro
+		settings.erro=''
+		"<div id=\"erro\">#{proverr}</div>"
+	end
+%>
+
+<div id="outer">
+<form action="/item" method="post">
+
+	<div id="item">
+	<fieldset>
+	<legend>Items</legend>
+	
+		<div id="item1">
+		<fieldset>
+		<legend>ESP</legend>
+			<label>T&iacute;tulo</label><br>
+			<input type="text" name="titulo" value="<%=
+			if settings.currentitem 
+				CGI::escapeHTML(settings.currentitem.titulo)
+			end
+			%>"><br>
+			<label>Texto</label><br>
+			<textarea name="texto" rows="15"><%=
+			if settings.currentitem 
+				CGI::escapeHTML(settings.currentitem.texto)
+			end
+			%></textarea><br>
+			<label>Enlace</label><br>
+			<input type="text" name="enlace" value="<%=
+			if settings.currentitem 
+				CGI::escapeHTML(settings.currentitem.enlace)
+			end
+			%>">
+		
+		</fieldset>
+		</div>
+		
+		<div id="item2">
+		<fieldset>
+		<legend>ENG</legend>
+			<label>Title</label><br>
+			<input type="text" name="title" value="<%=
+			if settings.currentitem 
+				CGI::escapeHTML(settings.currentitem.title)
+			end
+			%>"><br>
+			<label>Text</label><br>
+			<textarea name="text" rows="15"><%=
+			if settings.currentitem
+				CGI::escapeHTML(settings.currentitem.text)
+			end
+			%></textarea><br>
+			<label>Link</label><br>
+			<input type="text" name="link" value="<%=
+			if settings.currentitem 
+				CGI::escapeHTML(settings.currentitem.link)
+			end
+			%>">
+		</fieldset>
+		</div>
+		
+		<%
+			vn="\"noticia\""
+			vd="\"documento\""
+			ve="\"evento\""
+			vr="\"reflexion\""
+			vq="\"equipo\""
+			if settings.currentitem
+				ti=settings.currentitem.tipo
+				case ti
+				when "noticia"
+					vn="\"noticia\" selected=\"selected\""
+				when "documento"
+					vd="\"documento\" selected=\"selected\""
+				when "evento"
+					ve="\"evento\" selected=\"selected\""					
+				when "reflexion"
+					vr="\"reflexion\" selected=\"selected\""
+				when "equipo"
+					vq="\"equipo\" selected=\"selected\""
+				end				
+			end
+		%>
+		
+		<div id="tools">
+		<select name="tipo">
+			<option value=<%= vn %> >Noticia</option>
+			<option value=<%= vd %> >Documento</option>
+			<option value=<%= ve %> >Evento</option>
+			<option value=<%= vq %> >Equipo</option>
+			<option value=<%= vr %> >Reflexi&oacute;n</option>
+		</select>
+		
+		<select name=seltags onchange=addtag(this.value)>
+		<% if !settings.tags.nil?
+			settings.tags.each_key do |t| %>
+			<option value='<%= t %>'><%= "#{t}: #{settings.tags[t]}"%></option>
+		<%	end
+		   end	%>
+		</select>
+		
+		<input type="text" id="tagsid" name="tags" value="<%=
+			if settings.currentitem 
+				"#{settings.currentitem.tags}"
+			end
+			%>">
+		
+		<input type="submit" name="action" value="OK">
+		<input type="submit" name="action" value="Terminar">
+		</div>
+	
+	</fieldset>
+	</div>
+	
+	<%
+
+		noticias=[]
+		documentos=[]
+		eventos=[]
+		equipos=[]
+		reflexiones=[]
+		nreflex=1
+
+		settings.items.each do |j|
+			#binding.pry
+			i=j[1]
+			case (i.tipo)
+			when 'noticia'
+				noticias.push(j[0])
+			when 'evento'
+				eventos.push(j[0])
+			when 'documento'
+				documentos.push(j[0])
+			when 'equipo'
+				equipos.push(j[0])
+			when 'reflexion'
+				#t="Reflexion #{nreflex}"
+				#i.title=t
+				reflexiones.push(j[0])
+				#nreflex+=1								
+			end
+		end
+		
+		########################################################################
+		# Procesa las listas de las cajas contra los items
+		# La idea es mantener el orden de las listas de las cajas
+		snl=settings.noticias.length
+		nl=noticias.length
+		if (snl==nl)
+			# settings.noticias queda como estaba
+		elsif (snl<nl)
+			# Hay elementos nuevos. Encontrar y añadir al final
+			its=(noticias-settings.noticias)
+			its.each do |i|
+					settings.noticias.push(i)
+			end
+		else # (snl>nl)
+			its=settings.noticias-(settings.noticias-noticias)
+			settings.noticias=its
+		end
+		
+		snl=settings.documentos.length
+		nl=documentos.length
+		if (snl==nl)
+			# settings.documentos queda como estaba
+		elsif (snl<nl)
+			# Hay elementos nuevos. Encontrar y añadir al final
+			its=(documentos-settings.documentos)
+			its.each do |i|
+					settings.documentos.push(i)
+			end
+		else # (snl>nl)
+			its=settings.documentos-(settings.documentos-documentos)
+			settings.documentos=its
+		end
+		
+		snl=settings.eventos.length
+		nl=eventos.length
+		if (snl==nl)
+			# settings.eventos queda como estaba
+		elsif (snl<nl)
+			# Hay elementos nuevos. Encontrar y añadir al final
+			its=(eventos-settings.eventos)
+			its.each do |i|
+					settings.eventos.push(i)
+			end
+		else # (snl>nl)
+			its=settings.eventos-(settings.eventos-eventos)
+			settings.eventos=its
+		end
+		
+		snl=settings.equipos.length
+		nl=equipos.length
+		if (snl==nl)
+			# settings.equipos queda como estaba
+		elsif (snl<nl)
+			# Hay elementos nuevos. Encontrar y añadir al final
+			its=(equipos-settings.equipos)
+			its.each do |i|
+					settings.equipos.push(i)
+			end
+		else # (snl>nl)
+			its=settings.equipos-(settings.equipos-equipos)
+			settings.equipos=its
+		end
+		
+		snl=settings.reflexiones.length
+		nl=reflexiones.length
+		if (snl==nl)
+			# settings.reflexiones queda como estaba
+		elsif (snl<nl)
+			# Hay elementos nuevos. Encontrar y añadir al final
+			its=(reflexiones-settings.reflexiones)
+			its.each do |i|
+					settings.reflexiones.push(i)
+			end
+		else # (snl>nl)
+			its=settings.reflexiones-(settings.reflexiones-reflexiones)
+			settings.reflexiones=its
+		end
+		########################################################################
+		
+	%>
+
+    <div id="lists">
+        <fieldset>
+				Noticias
+				<div id="seccion">
+					<div id="texto">
+						<select name="noticias" size="10" style="width: 99%;">
+
+						<% 
+							t=''
+							if settings.notsel.nil?
+								settings.noticias.map{ |n| t=t+"<option value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" }
+							else
+								ident=settings.noticias[settings.notsel]
+								settings.noticias.map{ |n| ident==n ? t=t+"<option selected value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" : t=t+"<option value="+n+">"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" }
+							end
+							%> 
+						<%= t %>
+						
+				
+						</select>
+					</div>
+					<div id="botones">
+						<button type="submit" name="action" value="notup">&#94;</button><br>
+						<button type="submit" name="action" value="notdown">&#118;</button><br>
+					</div>
+				</div>
+				Documentos
+				<div id="seccion">
+					<div id="texto">
+						<select name="documentos" size="5" style="width: 99%;">
+				
+						<% 
+							t=''
+							if settings.docsel.nil?
+								settings.documentos.map{ |n| t=t+"<option value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" }
+							else
+								ident=settings.documentos[settings.docsel]
+								settings.documentos.map{ |n| ident==n ? t=t+"<option selected value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" : t=t+"<option value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" }
+							end%> 
+						<%= t %>
+
+						</select>
+					</div>
+					<div id="botones">
+						<button type="submit" name="action" value="docup">&#94;</button><br>
+						<button type="submit" name="action" value="docdown">&#118;</button><br>
+					</div><br>
+				</div>
+				Eventos				
+				<div id="seccion">
+					<div id="texto">
+						<select name="eventos" size="10" style="width: 99%;">
+				
+						<% 
+							t=''
+							if settings.evesel.nil?
+								settings.eventos.map{ |n| t=t+"<option value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" }
+							else
+								ident=settings.eventos[settings.evesel]
+								settings.eventos.map{ |n| ident==n ? t=t+"<option selected value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" : t=t+"<option value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" }
+							end%> 
+						<%= t %>				
+						</select><br>
+					</div>
+					<div id="botones">
+						<button type="submit" name="action" value="eveup">&#94;</button><br>
+						<button type="submit" name="action" value="evedown">&#118;</button><br>
+					</div>
+				</div>
+				Equipos de Conocimiento
+				<div id="seccion">
+					<div id="texto">
+						<select name="equipos" size="10" style="width: 99%;">
+
+						<% 
+							t=''
+							if settings.equsel.nil?
+								settings.equipos.map{ |n| t=t+"<option value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" }
+							else
+								ident=settings.equipos[settings.equsel]
+								settings.equipos.map{ |n| ident==n ? t=t+"<option selected value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" : t=t+"<option value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" }
+							end%> 
+						<%= t %>
+						
+				
+						</select>
+					</div>
+					<div id="botones">
+						<button type="submit" name="action" value="equup">&#94;</button><br>
+						<button type="submit" name="action" value="equdown">&#118;</button><br>
+					</div>
+				</div>
+
+				Reflexiones
+				<div id="seccion">
+					<div id="texto">
+						<select name="reflexiones" size="4" style="width: 99%;">
+
+						<% 
+							t=''
+							if settings.refsel.nil?
+								settings.reflexiones.map{ |n| t=t+"<option value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" }
+							else
+								ident=settings.reflexiones[settings.refsel]
+								settings.reflexiones.map{ |n| ident==n ? t=t+"<option selected value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" : t=t+"<option value=#{n}>"+CGI::escapeHTML(settings.items[n].title)+"</option>\n" }
+							end%> 
+						<%= t %>				
+
+						</select><br>
+					</div>
+					<div id="botones">
+						<button type="submit" name="action" value="refup">&#94;</button><br>
+						<button type="submit" name="action" value="refdown">&#118;</button><br>
+					</div>
+				</div>
+
+				<input type="submit" name="action" value="Carga">	
+				<input type="submit" name="action" value="Borra">	
+				<input type="submit" name="action" value="Copiar Elementos">					
+					
+										
+        </fieldset>
+    </div>
+        
+    
+</form>
+</div>
+
+<%
+
+		fname=settings.DirXML+"#{settings.boletin}-en.xml"
+		genXML(fname,'en')
+		fname=settings.DirXML+"#{settings.boletin}.xml"
+		genXML(fname,'es')
+%>
+
+</body>
