@@ -527,41 +527,59 @@ end
 
 post '/copiar' do
 
-	settings.boletin=params[:boletin]
-	
-	if (settings.boletin.nil?)
-		settings.erro="Debes seleccionar un boletin de destino"
-		redirect '/copiar'
-	end
-	
-	settings.noticias=[]
-	settings.documentos=[]
-	settings.eventos=[]
-	settings.equipos=[]
-	settings.reflexiones=[]
-	
 	origitems=settings.items.dup
+	accion=params[:action]
+	if (accion=='ANuevo')
 	
-	# Meh
-	#settings.items=nil
-	settings.items=nil
-	settings.items=Hash.new
-	settings.items=carga_boletin
-	
-	case (params[:action])
-	when 'Copiar'
+		filenames=Dir[settings.DirXML+"*.xml"]
+		h=filenames.sort_by { |x| x[/\d+/].to_i }
+		h.last  =~ /.*boletin(\d+)/
+		id=$1.to_i+1
+		Orig=Date.new(2013,6,3)
+		actual=Orig+((id-1)*7)
 		
-	listas=[params[:noticias],params[:documentos],params[:eventos],params[:reflexiones],params[:equipos]]
+		settings.idboletin=id
+		settings.boletin="boletin#{id}"
 
-		listas.each do |t|
-			if !t.nil?
-				t.each do |e|
-					elem=origitems[e]
-					settings.items[e]=elem
-				end
-			end
+		settings.fechaes="#{actual.day} de #{Meses[actual.month-1]} de #{actual.year}"
+		settings.fechaen="#{Months[actual.month-1]} #{actual.day}, #{actual.year}"
+	
+		settings.items=nil
+		settings.items=Hash.new
+	
+	else
+		settings.boletin=params[:boletin]
+
+		# Meh
+		settings.items=nil
+		settings.items=Hash.new
+		settings.items=carga_boletin
+	
+		if (settings.boletin.nil?)
+			settings.erro="Debes seleccionar un boletin de destino"
+			redirect '/copiar'
 		end
 	end
+	
+		settings.noticias=[]
+		settings.documentos=[]
+		settings.eventos=[]
+		settings.equipos=[]
+		settings.reflexiones=[]
+		
+		
+	
+		listas=[params[:noticias],params[:documentos],params[:eventos],params[:reflexiones],params[:equipos]]
+
+			listas.each do |t|
+				if !t.nil?
+					t.each do |e|
+						elem=origitems[e]
+						settings.items[e]=elem
+					end
+				end
+			end
+	
 	redirect '/item'
 end
 
