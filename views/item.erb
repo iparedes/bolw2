@@ -52,6 +52,22 @@ function addtag(val)
 				CGI::escapeHTML(settings.currentitem.enlace)
 			end
 			%>">
+						
+			<%=
+				t="<select name=\"len\">\n"
+				settings.Idiomas.each do |i|
+					if settings.currentitem
+						if settings.currentitem.lan==i
+							t=t+"<option selected value=#{i}>#{i}</option>\n"
+						else
+							t=t+"<option value=#{i}>#{i}</option>\n"
+						end
+					else
+						t=t+"<option value=#{i}>#{i}</option>\n"
+					end
+				end
+				t=t+"</select>\n"
+			%>
 		
 		</fieldset>
 		</div>
@@ -77,6 +93,24 @@ function addtag(val)
 				CGI::escapeHTML(settings.currentitem.link)
 			end
 			%>">
+
+			<%=
+				t="<select name=\"lan\">\n"
+				settings.Idiomas.each do |i|
+					if settings.currentitem
+						if settings.currentitem.lan==i
+							t=t+"<option selected value=#{i}>#{i}</option>\n"
+						else
+							t=t+"<option value=#{i}>#{i}</option>\n"
+						end
+					else
+						t=t+"<option value=#{i}>#{i}</option>\n"
+					end
+				end
+				t=t+"</select>\n"
+			%>
+
+
 		</fieldset>
 		</div>
 		
@@ -119,6 +153,21 @@ function addtag(val)
 		<%	end
 		   end	%>
 		</select>
+	
+		<%=
+		dest=0
+		if settings.currentitem
+			dest=settings.currentitem.destacado
+			binding.pry
+			if dest=="0"
+				t="<input type=\"checkbox\" name=\"destacado\">Destacado"
+			else
+				t="<input type=\"checkbox\" name=\"destacado\" checked>Destacado"
+			end
+		else
+			t="<input type=\"checkbox\" name=\"destacado\">Destacado"
+		end
+		%>
 		
 		<input type="text" id="tagsid" name="tags" value="<%=
 			if settings.currentitem 

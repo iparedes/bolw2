@@ -1,6 +1,6 @@
 
 class Item
-	attr_accessor :titulo, :title, :texto, :text, :enlace, :link, :tipo, :tags, :idioma
+	attr_accessor :titulo, :title, :texto, :text, :enlace, :link, :tipo, :tags, :lan, :len, :destacado
 	
 	def initialize()
 		@titulo=nil
@@ -11,10 +11,12 @@ class Item
 		@link=nil
 		@tipo=nil
 		@tags=nil
-		@idioma=nil
+		@lan=nil
+		@len=nil
+		@destacado=nil
 	end
 
-	def setall(titulo,title,texto,text,enlace,link,tipo,tags,idioma)
+	def setall(titulo,title,texto,text,enlace,link,tipo,tags,lan,len,destacado)
 		@titulo=titulo
 		@title=title
 		@texto=texto
@@ -23,7 +25,9 @@ class Item
 		@link=link
 		@tipo=tipo
 		@tags=tags
-		@idioma=idioma		
+		@lan=lan
+		@len=len
+		@destacado=destacado	
 	end
 
 
@@ -42,7 +46,14 @@ class Item
 		@link=(noden/'./link').text
 		@tipo=(nodes/'./tipo').text	
 		@tags=(noden/'./tag').text
-		@idioma=(nodes/'./idioma').text
+		@lan=(nodes/'./lan').text
+		@len=(nodes/'./len').text
+		d=(nodes/'./destacado').text
+		if d==''
+			@destacado=0
+		else
+			@destacado=d
+		end
 	end
 
 end

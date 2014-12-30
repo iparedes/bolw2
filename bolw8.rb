@@ -50,10 +50,12 @@ set :evesel, nil
 set :refsel, nil
 set :equsel, nil
 set :nreflex, 0
-set :cargado, false
+set :cargado, nil
+set :Idiomas, ['EN','ES','PO','FR','GE']
 
 Meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
 Months=['January','February','March','April','May','June','July','August','September','October','November','December']
+
 
 $showExceptions = Sinatra::ShowExceptions.new(self)
 
@@ -96,18 +98,34 @@ def htmlitem(item,lan)
 			tit=item.titulo
 			tex=item.texto
 			lin=item.enlace
+			idioma=item.len
 		else
 			tit=item.title
 			tex=item.text
 			lin=item.link
+			idioma=item.lan
 		end
-		t="<div>
-		<strong>#{tit}</strong></div>
-	<div>#{tex}</div>"
-		if (lan=='es')
-			u="<div><a href=\"#{lin}\" target=\"_self\">Enlace</a></div><div>&nbsp;</div>"
+		
+		if (item.destacado=="1")
+			t="<div>
+			<strong><font size=\"4\" color=\"#B40404\">#{tit}</font></strong></div>
+			<div>#{tex}</div>"
 		else
-			u="<div><a href=\"#{lin}\" target=\"_self\">Link</a></div><div>&nbsp;</div>"
+			t="<div>
+			<strong>#{tit}</strong></div>
+			<div>#{tex}</div>"
+		end
+		
+		if (lan=='es')
+			u="<div><a href=\"#{lin}\" target=\"_self\">Enlace</a>"
+		else
+			u="<div><a href=\"#{lin}\" target=\"_self\">Link</a>"
+		end
+		
+		if !idioma.empty?
+			u=u+" [#{idioma}]</div><div>&nbsp;</div>"
+		else
+			u=u+"</div><div>&nbsp;</div>"
 		end
 
 		# Hack para evitar entradas de equipos de conocimiento en boletin inglés
@@ -193,6 +211,9 @@ def carga_boletin
 		# Genera token aleatorio
 		h=rand(36**8).to_s(36)
 		its[h]=item
+		if item.tipo=="reflexion"
+			settings.nreflex=settings.nreflex+1
+		end
 		#settings.items.push(item)
 	end
 	# items contiene los items cargados de los XML es y en
@@ -214,6 +235,8 @@ get '/' do
 	settings.reflexiones=Array.new
 	
 	settings.currentitem=nil
+	settings.nreflex=0
+	
 	erb :index
 end
 
@@ -267,14 +290,26 @@ post '/item' do
 		link=params[:link]	
 		tipo=params[:tipo]
 		tags=params[:tags]
-		idioma="EN"
+		lan=params[:lan]
+		len=params[:len]
+		destacado=params[:destacado]
+		
+		#idioma="EN"
+		
+		if destacado=="on"
+			destacado="1"
+		else
+			destacado="0"
+		end
 		
 		if (tipo!='reflexion')
 			if link.empty?
 				link=enlace
+				lan=len
 			end
 			if enlace.empty?
 				enlace=link
+				len=lan
 			end
 			if titulo.empty?
 				titulo=title
@@ -288,17 +323,32 @@ post '/item' do
 			title=titulo
 		end
 
-		if settings.cargado
+		if !settings.cargado.nil?
 			# Estamos editando
 			# CurrentItem se establecio al cargar
 
+			settings.currentitem=Item.new
+			settings.currentitem.setall(titulo,title,texto,text,enlace,link,tipo,tags,lan,len,destacado)
+			# Comprobaciones (redirigen a /item con currentitem establecido
+			if (tipo!='reflexion')
+				if (link.empty? && enlace.empty?)
+					settings.erro="Debes completar el campo Enlace/Link"
+					redirect '/item'
+				end
+			end
+
+
+			settings.items[settings.cargado]=settings.currentitem
+			# Anulamos currentitem antes de redirigir
+			settings.currentitem=nil
+			settings.cargado=nil
 			redirect '/item'
 		
 		else
 			# Nuevo elemento
 			
 			settings.currentitem=Item.new
-			settings.currentitem.setall(titulo,title,texto,text,enlace,link,tipo,tags,idioma)
+			settings.currentitem.setall(titulo,title,texto,text,enlace,link,tipo,tags,lan,len,destacado)
 			
 			# Comprobaciones (redirigen a /item con currenitem establecido
 			if (tipo!='reflexion')
@@ -331,7 +381,7 @@ post '/item' do
 		end
 		
 		settings.currentitem=settings.items[t]
-		settings.cargado=true
+		settings.cargado=t
 		redirect '/item'
 
 	when 'Terminar'
@@ -494,7 +544,6 @@ post '/copiar' do
 	
 	# Meh
 	#settings.items=nil
-	binding.pry
 	settings.items=nil
 	settings.items=Hash.new
 	settings.items=carga_boletin

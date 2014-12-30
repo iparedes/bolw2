@@ -11,10 +11,12 @@ xml.boletin do
 				titulo=i.titulo
 				texto=i.texto
 				link=i.enlace
+				idioma=i.len
 			else
 				titulo=i.title
 				texto=i.text
 				link=i.link
+				idioma=i.lan
 			end	
 
 			xml.item do
@@ -23,6 +25,8 @@ xml.boletin do
 				xml.link link
 				xml.tipo i.tipo
 				xml.tag i.tags
+				xml.lan idioma
+				xml.destacado i.destacado
 			end
 		end
 	end
