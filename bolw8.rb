@@ -498,6 +498,7 @@ get '/nuevoboletin' do
 	settings.eventos=nil
 	settings.equipos=nil
 	settings.reflexiones=nil
+	settings.nreflex=0
 	
 	settings.noticias=Array.new
 	settings.documentos=Array.new
@@ -546,6 +547,7 @@ post '/copiar' do
 	
 		settings.items=nil
 		settings.items=Hash.new
+		settings.nreflex=0
 	
 	else
 		settings.boletin=params[:boletin]

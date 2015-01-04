@@ -46,8 +46,8 @@ class Item
 		@link=(noden/'./link').text
 		@tipo=(nodes/'./tipo').text	
 		@tags=(noden/'./tag').text
-		@lan=(nodes/'./lan').text
-		@len=(nodes/'./len').text
+		@len=(nodes/'./lan').text
+		@lan=(noden/'./lan').text
 		d=(nodes/'./destacado').text
 		if d==''
 			@destacado=0
