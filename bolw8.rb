@@ -488,6 +488,23 @@ post '/item' do
 			i==settings.reflexiones.length-1 ? settings.refsel=i : settings.refsel=i+1
 		end
 		redirect '/item'
+	when 'Borra'
+		t=params[:noticias]
+		if (t.nil?)
+			t=params[:documentos]
+			if (t.nil?)
+				t=params[:eventos]
+				if (t.nil?)
+					t=params[:equipos]
+					if (t.nil?)
+						t=params[:reflexiones]
+					end
+				end
+			end
+		end
+		settings.currentitem=nil
+		settings.items.delete(t)
+		redirect '/item'			
 	end
 
 end
