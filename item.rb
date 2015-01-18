@@ -32,13 +32,18 @@ class Item
 
 
 	def setfromxml(nodes,noden)
+	  # hack tremendo para evitar cuando uno de los nodos es nil
+	  # (debido a que los XML no son coherentes
+	  begin
 		@tipo=(nodes/'./tipo').text	
 		@titulo=(nodes/'./titulo').text	
 		@title=(noden/'./titulo').text
 		if (@tipo=='reflexion') and (@titulo.empty?)
-			settings.nreflex=settings.nreflex+1
-			@titulo="Reflexion "+settings.nreflex
-			@title="Thought "+settings.nreflex
+			#settings.nreflex=settings.nreflex+1
+			#@titulo="Reflexion "+settings.nreflex
+			#@title="Thought "+settings.nreflex
+			@titulo="Reflexion"
+			@title="Thought"
 		end
 		@texto=(nodes/'./texto').text	
 		@text=(noden/'./texto').text
@@ -54,6 +59,9 @@ class Item
 		else
 			@destacado=d
 		end
+	  rescue
+	  end
+
 	end
 
 end

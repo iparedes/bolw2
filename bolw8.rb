@@ -648,3 +648,87 @@ post '/upload' do
 	end
 	redirect '/'
 end
+
+get '/historico' do
+	erb :historico
+end
+
+post '/historico' do
+
+	its=Hash.new 
+	listas=Hash.new
+
+	case (params[:action])
+	when 'NotES'
+		tipo='noticia'
+		lan='es'
+	when 'NotEN'
+		tipo='noticia'
+		lan='en'
+	when 'DocES'
+		tipo='documento'
+		lan='es'
+	when 'DocEN'
+		tipo='documento'
+		lan='en'
+	when 'EveES'
+		tipo='evento'
+		lan='es'
+	when 'EveEN'
+		tipo='evento'
+		lan='en'
+	when 'RefES'
+		tipo='reflexion'
+		lan='es'
+	when 'RefEN'
+		tipo='reflexion'
+		lan='en'
+	when 'Equ'
+		tipo='equipo'
+		lan='es'
+	end
+	
+	filenames=Dir[settings.DirXML+"*.xml"]
+	filenames.sort!
+	filenames.each do |f|
+		lista=nil
+		lista=Array.new
+
+		if f=~ /.*boletin(\d+)\.xml/
+			nombre="boletin"+$1
+
+			fname=settings.DirXML+nombre+"-en.xml"
+			f=File.open(fname)
+			docen=Nokogiri::XML(f)
+			f.close
+			fname=settings.DirXML+nombre+".xml"
+			f=File.open(fname)
+			doces=Nokogiri::XML(f)
+			f.close
+
+			idboletin=doces.xpath("//id").text
+			fechaes=doces.xpath("//fecha").text
+			fechaen=docen.xpath("//fecha").text
+
+			nodoses=doces.xpath("//item")
+			nodosen=docen.xpath("//item")
+			
+			nodos=nodoses.zip(nodosen)
+			nodos.each do |nodoes,nodoen|
+				t=(nodoes/'./tipo').text
+				if (t==tipo)
+					item=nil		
+					item=Item.new()
+					item.setfromxml(nodoes,nodoen)
+					lista.push(item)
+				end
+			end
+			listas[fechaes]=lista
+		else
+			next
+		end
+	end
+			
+	"#{erb :hist, :locals => {:listas => listas, :tipo => tipo, :lan => lan}}"
+
+end
