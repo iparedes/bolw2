@@ -1,0 +1,55 @@
+<html>
+    <head>
+        <title>
+        Hist&oacute;rico de noticias
+        <%=
+        	if (lan=='es')
+        		" ES"
+        	else
+        		" EN"
+        	end
+        %>
+        </title>
+	</head>
+    <body>
+	
+	<%
+		listas.keys.each do |fecha|
+	%>
+	<h3>
+	<%=
+			fecha
+	%>	
+	</h3>
+	<%
+			l=listas[fecha]
+			l.each do |i|
+				if (lan=='es')
+					titulo=i.titulo
+					texto=i.texto
+					enlace=i.enlace
+					tags=i.tags
+				else
+					titulo=i.title
+					texto=i.text
+					enlace=i.link
+					tags=i.tags					
+				end
+	%>
+				<b>
+				<%=titulo%>
+				</b><br>
+				<%=texto%><br>
+				<%=enlace%><br>
+				<%=tags%><br><br>
+	<%
+			end
+		end
+	%>    
+    
+    
+    </body>
+</html>
+
+
+
